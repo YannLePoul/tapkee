@@ -15,7 +15,7 @@ set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 # Eigen3 detection
 find_package(Eigen3 REQUIRED)
 include_directories(SYSTEM "${EIGEN3_INCLUDE_DIR}")
-
+message( "eigen3 dirs:"  "${EIGEN3_INCLUDE_DIR}")
 # ARPACK detection
 find_package(Arpack)
 if (ARPACK_FOUND)
@@ -43,13 +43,6 @@ if (OPENCL_FOUND)
 endif()
 
 include_directories("${TAPKEE_INCLUDE_DIR}")
-# CLI executable
-add_executable(tapkee "${TAPKEE_SRC_DIR}/cli/main.cpp")
-# Examples
-option(BUILD_EXAMPLES "Whether to build examples or not" OFF)
-if (BUILD_EXAMPLES)
-	add_subdirectory(examples)
-endif()
 
 if (ARPACK_FOUND)
 	target_link_libraries(tapkee arpack)
@@ -61,52 +54,10 @@ if (VIENNACL_FOUND)
 	add_definitions(-DTAPKEE_WITH_VIENNACL)
 endif()
 
-if (TAPKEE_CUSTOM_INSTALL_DIR)
-	set (TAPKEE_INSTALL_DIR
-		"${TAPKEE_CUSTOM_INSTALL_DIR}")
-else()
-	set (TAPKEE_INSTALL_DIR
-		"${CMAKE_INSTALL_PREFIX}/include/tapkee")
-endif()
 
-
-file(GLOB headers "${TAPKEE_INCLUDE_DIR}/tapkee/*.hpp")
-install(FILES ${headers} DESTINATION "${TAPKEE_INSTALL_DIR}")
-file(GLOB headers "${TAPKEE_INCLUDE_DIR}/tapkee/utils/*.hpp")
-install(FILES ${headers} DESTINATION "${TAPKEE_INSTALL_DIR}/utils")
-file(GLOB headers "${TAPKEE_INCLUDE_DIR}/tapkee/routines/*.hpp")
-install(FILES ${headers} DESTINATION "${TAPKEE_INSTALL_DIR}/routines")
-file(GLOB headers "${TAPKEE_INCLUDE_DIR}/tapkee/callbacks/*.hpp")
-install(FILES ${headers} DESTINATION "${TAPKEE_INSTALL_DIR}/callbacks")
-file(GLOB headers "${TAPKEE_INCLUDE_DIR}/tapkee/neighbors/*.hpp")
-install(FILES ${headers} DESTINATION "${TAPKEE_INSTALL_DIR}/neighbors")
-file(GLOB headers "${TAPKEE_INCLUDE_DIR}/tapkee/traits/*.hpp")
-install(FILES ${headers} DESTINATION "${TAPKEE_INSTALL_DIR}/traits")
-file(GLOB headers "${TAPKEE_INCLUDE_DIR}/tapkee/parameters/*.hpp")
-install(FILES ${headers} DESTINATION "${TAPKEE_INSTALL_DIR}/parameters")
-file(GLOB headers "${TAPKEE_INCLUDE_DIR}/tapkee/defines/*.hpp")
-install(FILES ${headers} DESTINATION "${TAPKEE_INSTALL_DIR}/defines")
-file(GLOB headers "${TAPKEE_INCLUDE_DIR}/tapkee/external/barnes_hut_sne/*.hpp")
-install(FILES ${headers} DESTINATION "${TAPKEE_INSTALL_DIR}/external/barnes_hut_sne/")
-
-# G++ specific flags
-option(USE_GCOV "Use gcov to analyze test coverage" OFF)
 
 if (CMAKE_COMPILER_IS_GNUCXX)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -Wno-long-long -Wshadow")
-	if (USE_GCOV)
-		set(CMAKE_BUILD_TYPE Debug)
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
-		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fprofile-arcs -ftest-coverage")
-
-		add_custom_target(lcov DEPENDS tapkee)
-		add_custom_command(TARGET lcov COMMAND mkdir -p coverage WORKING_DIRECTORY "${CMAKE_BINARY_DIR}" VERBATIM)
-		add_custom_command(TARGET lcov COMMAND lcov --directory . --zerocounters WORKING_DIRECTORY "${CMAKE_BINARY_DIR}" VERBATIM)
-		add_custom_command(TARGET lcov COMMAND make test WORKING_DIRECTORY "${CMAKE_BINARY_DIR}" VERBATIM)
-		add_custom_command(TARGET lcov COMMAND lcov --directory . --capture --output-file ./coverage/out.info WORKING_DIRECTORY "${CMAKE_BINARY_DIR}" VERBATIM)
-		add_custom_command(TARGET lcov COMMAND lcov --remove ./coverage/out.info /usr/local/include\\* /usr/include\\* unit\\* --output ./coverage/clean.info "${CMAKE_BINARY_DIR}" VERBATIM)
-		add_custom_command(TARGET lcov COMMAND genhtml -o ./coverage ./coverage/clean.info --branch-coverage --demangle-cpp WORKING_DIRECTORY "${CMAKE_BINARY_DIR}" VERBATIM)
-	endif()
 endif()
 
 if (NOT CMAKE_BUILD_TYPE)
@@ -129,51 +80,6 @@ if (NOT GPL_FREE)
 	add_definitions(-DTAPKEE_USE_LGPL_COVERTREE)
 endif()
 
-option(BUILD_TESTS "Build tests" OFF)
+add_library(${PROJECT_NAME} ${TAPKEE_INCLUDE_DIR})
 
-if (BUILD_TESTS)
-	if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/gtest-1.7.0/")
-		add_subdirectory(gtest-1.7.0)
-		set(GTEST_SOURCE_DIR "${gtest_SOURCE_DIR}")
-		include_directories(SYSTEM "${GTEST_SOURCE_DIR}/include")
-	else()
-		if (NOT GTEST_SOURCE_DIR)
-			# try with default ubuntu location
-			set(GTEST_SOURCE_DIR /usr/src/gtest)
-		endif()
-		if (NOT GTEST_INCLUDE_DIR)
-			# try with default ubuntu location
-			set(GTEST_INCLUDE_DIR /usr/include/gtest)
-		endif()
-		if (GTEST_SOURCE_DIR AND GTEST_INCLUDE_DIR)
-			include_directories("${GTEST_SOURCE_DIR}" "${GTEST_INCLUDE_DIR}/include")
-			add_library(gtest STATIC "${GTEST_SOURCE_DIR}/src/gtest-all.cc")
-			add_library(gtest_main STATIC "${GTEST_SOURCE_DIR}/src/gtest_main.cc")
-			target_link_libraries(gtest_main gtest)
-			find_package(Threads)
-			target_link_libraries(gtest ${CMAKE_THREAD_LIBS_INIT})
-		else()
-			message(FATAL_ERROR "gtest-1.7.0 is required to be available in the root of the project or reachable 
-			                     by GTEST_SOURCE_DIR and GTEST_INCLUDE_DIR")
-		endif()
-	endif()
-	enable_testing()
 
-	aux_source_directory("${TAPKEE_TESTS_DIR}" "TAPKEE_TESTS_SOURCES")
-	foreach(i ${TAPKEE_TESTS_SOURCES})
-		get_filename_component(exe ${i} NAME_WE)
-		add_executable(test_${exe} ${i})
-		target_link_libraries(test_${exe} gtest gtest_main)
-		if (ARPACK_FOUND)
-			target_link_libraries(test_${exe} arpack)
-		endif()
-		if (VIENNACL_FOUND)
-			target_link_libraries(test_${exe} OpenCL)
-		endif()
-		add_test(
-			NAME ${exe}
-			WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-			COMMAND "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_${exe}"
-			--gtest_color=yes)
-	endforeach()
-endif()
