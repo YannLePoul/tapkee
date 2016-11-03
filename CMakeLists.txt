@@ -1,6 +1,6 @@
-project (Tapkee)
+project (Tapkee  LANGUAGES CXX)
 
-cmake_minimum_required (VERSION 2.6.2)
+cmake_minimum_required (VERSION 3.3)
 
 # set paths
 set (TAPKEE_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
@@ -15,7 +15,7 @@ set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 # Eigen3 detection
 find_package(Eigen3 REQUIRED)
 include_directories(SYSTEM "${EIGEN3_INCLUDE_DIR}")
-message( "eigen3 dirs:"  "${EIGEN3_INCLUDE_DIR}")
+
 # ARPACK detection
 find_package(Arpack)
 if (ARPACK_FOUND)
@@ -42,15 +42,20 @@ if (OPENCL_FOUND)
 	endif()
 endif()
 
+file(GLOB headers "${TAPKEE_INCLUDE_DIR}/tapkee/*.hpp")
+
 include_directories("${TAPKEE_INCLUDE_DIR}")
+add_library(tapkee INTERFACE)
+target_include_directories(tapkee INTERFACE ${TAPKEE_INCLUDE_DIR} "${EIGEN3_INCLUDE_DIR}")
 
 if (ARPACK_FOUND)
-	target_link_libraries(tapkee arpack)
+        include_directories(${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS})
+        target_link_libraries(tapkee INTERFACE arpack)
 	add_definitions(-DTAPKEE_WITH_ARPACK)
 endif()
 
 if (VIENNACL_FOUND)
-	target_link_libraries(tapkee OpenCL)
+        target_link_libraries(tapkee INTERFACE OpenCL)
 	add_definitions(-DTAPKEE_WITH_VIENNACL)
 endif()
 
@@ -58,10 +63,6 @@ endif()
 
 if (CMAKE_COMPILER_IS_GNUCXX)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -Wno-long-long -Wshadow")
-endif()
-
-if (NOT CMAKE_BUILD_TYPE)
-	set(CMAKE_BUILD_TYPE Release)
 endif()
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
@@ -80,6 +81,5 @@ if (NOT GPL_FREE)
 	add_definitions(-DTAPKEE_USE_LGPL_COVERTREE)
 endif()
 
-add_library(${PROJECT_NAME} ${TAPKEE_INCLUDE_DIR})
 
 
