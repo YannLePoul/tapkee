@@ -42,7 +42,7 @@ if (OPENCL_FOUND)
 	endif()
 endif()
 
-file(GLOB headers "${TAPKEE_INCLUDE_DIR}/*/*.hpp")
+file(GLOB_RECURSE headers "${TAPKEE_INCLUDE_DIR}/*.hpp")
 
 include_directories("${TAPKEE_INCLUDE_DIR}")
 add_library(tapkee INTERFACE)
@@ -50,6 +50,7 @@ target_include_directories(tapkee INTERFACE ${TAPKEE_INCLUDE_DIR} "${EIGEN3_INCL
 
 add_library(tapkee_disp_folder ${headers})
 set_target_properties(tapkee_disp_folder PROPERTIES LINKER_LANGUAGE CXX)
+target_include_directories(tapkee_disp_folder PUBLIC ${TAPKEE_INCLUDE_DIR} "${EIGEN3_INCLUDE_DIR}")
 
 if (ARPACK_FOUND)
         include_directories(${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS})

@@ -249,6 +249,10 @@ public:
 		this->dups = other.dups;
 		return *this;
 	}
+
+    /** Check for duplicate in the parameter set.
+     *
+     */
 	void check() 
 	{
 		if (!dups.empty())
@@ -272,7 +276,12 @@ public:
 	{
 		return pmap.count(name) > 0;
 	}
-	void merge(const ParametersSet& pg) 
+
+    /** Merge parameters with already stored ones
+     *
+     * @param Parameter set
+     */
+    void merge(const ParametersSet& pg)
 	{
 		typedef ParametersMap::const_iterator MapIter;
 		for (MapIter iter = pg.pmap.begin(); iter!=pg.pmap.end(); ++iter)
