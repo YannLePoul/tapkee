@@ -225,7 +225,7 @@ private:
 
 };
 
-CheckedParameter Parameter::checked() 
+inline CheckedParameter Parameter::checked()
 {
 	return CheckedParameter(*this);
 }
@@ -316,7 +316,7 @@ private:
 	DuplicatesList dups;
 };
 
-ParametersSet Parameter::operator,(const Parameter& p)
+inline ParametersSet Parameter::operator,(const Parameter& p)
 {
 	ParametersSet pg;
 	pg.add(*this);
@@ -324,7 +324,7 @@ ParametersSet Parameter::operator,(const Parameter& p)
 	return pg;
 }
 
-Parameter::operator ParametersSet()
+inline Parameter::operator ParametersSet()
 {
 	ParametersSet pg;
 	pg.add(*this);

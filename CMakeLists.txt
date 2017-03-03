@@ -2,6 +2,11 @@ project (Tapkee  LANGUAGES CXX)
 
 cmake_minimum_required (VERSION 3.3)
 
+# cmake version > 3.1
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 # set paths
 set (TAPKEE_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set (TAPKEE_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
@@ -45,22 +50,18 @@ endif()
 file(GLOB_RECURSE headers "${TAPKEE_INCLUDE_DIR}/*.hpp")
 
 include_directories("${TAPKEE_INCLUDE_DIR}")
-add_library(tapkee INTERFACE)
-target_include_directories(tapkee INTERFACE ${TAPKEE_INCLUDE_DIR} "${EIGEN3_INCLUDE_DIR}")
-
-add_library(tapkee_disp_folder ${headers})
-set_target_properties(tapkee_disp_folder PROPERTIES LINKER_LANGUAGE CXX)
-target_include_directories(tapkee_disp_folder PUBLIC ${TAPKEE_INCLUDE_DIR} "${EIGEN3_INCLUDE_DIR}")
+add_library(tapkee_library INTERFACE)
+target_include_directories(tapkee_library INTERFACE ${TAPKEE_INCLUDE_DIR} "${EIGEN3_INCLUDE_DIR}")
 
 if (ARPACK_FOUND)
-        include_directories(${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS})
-        target_link_libraries(tapkee INTERFACE arpack)
+    include_directories(${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS})
+    target_link_libraries(tapkee_library INTERFACE arpack)
 	add_definitions(-DTAPKEE_WITH_ARPACK)
 endif()
 
 if (VIENNACL_FOUND)
-        target_link_libraries(tapkee INTERFACE OpenCL)
-	add_definitions(-DTAPKEE_WITH_VIENNACL)
+    target_link_libraries(tapkee_library INTERFACE OpenCL)
+    add_definitions(-DTAPKEE_WITH_VIENNACL)
 endif()
 
 
