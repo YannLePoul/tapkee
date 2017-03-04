@@ -7,7 +7,6 @@
 #define TAPKEE_PCA_H_
 
 /* Tapkee includes */
-#define TAPKEE_CUSTOM_NUMTYPE float
 #include <tapkee/defines.hpp>
 #include <tapkee/utils/time.hpp>
 /* End of Tapkee includes */
