@@ -15,6 +15,9 @@
 # Copyright (c) 2009 Benoit Jacob <jacob.benoit.1@gmail.com>
 # Redistribution and use is allowed according to the terms of the 2-clause BSD license.
 
+# TODO: use this  findEigen3 :https://github.com/ceres-solver/ceres-solver/blob/master/cmake/FindEigen.cmake
+# which seems better!
+
 if(NOT Eigen3_FIND_VERSION)
   if(NOT Eigen3_FIND_VERSION_MAJOR)
     set(Eigen3_FIND_VERSION_MAJOR 2)
