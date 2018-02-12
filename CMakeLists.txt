@@ -49,7 +49,7 @@ endif()
 
 include_directories("${TAPKEE_INCLUDE_DIR}")
 add_library(tapkee_library INTERFACE)
-target_include_directories(tapkee_library INTERFACE ${TAPKEE_INCLUDE_DIR} "${EIGEN3_INCLUDE_DIR}")
+target_include_directories(tapkee_library INTERFACE "${TAPKEE_INCLUDE_DIR}" "${EIGEN3_INCLUDE_DIR}")
 
 if (ARPACK_FOUND)
 	include_directories(${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS})
