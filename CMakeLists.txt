@@ -47,8 +47,6 @@ if (OPENCL_FOUND)
 	endif()
 endif()
 
-file(GLOB_RECURSE headers "${TAPKEE_INCLUDE_DIR}/*.hpp")
-
 include_directories("${TAPKEE_INCLUDE_DIR}")
 add_library(tapkee_library INTERFACE)
 target_include_directories(tapkee_library INTERFACE ${TAPKEE_INCLUDE_DIR} "${EIGEN3_INCLUDE_DIR}")
